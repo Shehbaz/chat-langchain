@@ -253,7 +253,7 @@ export function ChatWindow(props: {
           height={"55px"}
           rounded={"full"}
           type={'text'}
-          placeholder='What is LangChain Expression Language?'
+          placeholder='What is your question?'
           textColor={"white"}
           borderColor={"rgb(58, 58, 61)"}
           onSubmit={(e) => {

@@ -2,6 +2,7 @@
 import logging
 import os
 import re
+import pdb
 from bs4 import BeautifulSoup, SoupStrainer, Tag
 import weaviate
 from langchain.document_loaders.recursive_url_loader import RecursiveUrlLoader
@@ -66,17 +67,18 @@ def _simple_extractor(html):
 
 
 def ingest_docs():
-    simple_urls = ["https://api.python.langchain.com/en/latest/"]
-    doc_urls = [
-        "https://python.langchain.com/docs/get_started",
-        "https://python.langchain.com/docs/use_cases",
-        "https://python.langchain.com/docs/integrations",
-        "https://python.langchain.com/docs/modules",
-        "https://python.langchain.com/docs/guides",
-        "https://python.langchain.com/docs/additional_resources",
-        "https://python.langchain.com/docs/community",
-        "https://python.langchain.com/docs/expression_language",
-    ]
+
+    simple_urls = ["https://www.institute.global/global-health-security-consortium"]
+    doc_urls = []
+    #     "https://python.langchain.com/docs/get_started",
+    #     "https://python.langchain.com/docs/use_cases",
+    #     "https://python.langchain.com/docs/integrations",
+    #     "https://python.langchain.com/docs/modules",
+    #     "https://python.langchain.com/docs/guides",
+    #     "https://python.langchain.com/docs/additional_resources",
+    #     "https://python.langchain.com/docs/community",
+    #     "https://python.langchain.com/docs/expression_language",
+    # ]
     urls = [(url, _simple_extractor) for url in simple_urls] + [
         (url, _doc_extractor) for url in doc_urls
     ]
@@ -113,6 +115,7 @@ def ingest_docs():
         url=WEAVIATE_URL,
         auth_client_secret=weaviate.AuthApiKey(api_key=WEAVIATE_API_KEY),
     )
+    
     embedding = OpenAIEmbeddings(chunk_size=200)  # rate limit
     vectorstore = Weaviate(
         client,
@@ -122,7 +125,6 @@ def ingest_docs():
         by_text=False,
         attributes=["source", "title"],
     )
-
     record_manager = SQLRecordManager(
         f"weaviate/{WEAVIATE_DOCS_INDEX_NAME}", db_url=RECORD_MANAGER_DB_URL
     )
@@ -134,6 +136,7 @@ def ingest_docs():
         cleanup="full",
         source_id_key="source",
     )
+
 
     logger.info(
         "LangChain now has this many vectors: ",

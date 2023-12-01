@@ -10,9 +10,9 @@ export default function Home() {
     <ChakraProvider>
       <ToastContainer />
       <ChatWindow
-        apiBaseUrl={process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080"}
-        titleText="Chat LangChain 🦜🔗"
-        placeholder="What is LangChain Expression Language?"
+        apiBaseUrl={process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081"}
+        titleText="Devbox Chat"
+        placeholder="What is Oxford scholarship?"
       ></ChatWindow>
     </ChakraProvider>
   );

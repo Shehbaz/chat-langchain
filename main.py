@@ -10,7 +10,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import MessagesPlaceholder
 from langchain.schema.messages import HumanMessage, AIMessage
 from langchain.vectorstores import Weaviate
-from langsmith import Client
+# from langsmith import Client
 from threading import Thread
 from queue import Queue, Empty
 from collections.abc import Generator
@@ -52,7 +52,7 @@ _MODEL_MAP = {
     "anthropic": "claude-2",
 }
 
-client = Client()
+# client = Client()
 
 app = FastAPI()
 app.add_middleware(
@@ -195,27 +195,24 @@ async def chat_endpoint(request: Request):
                 chat_history, llm_without_callback, get_retriever()
             )
             chain = create_chain(llm, retriever_chain)
-            with trace_as_chain_group("end_to_end_chain") as group_manager:
-                docs = retriever_chain.invoke(
-                    {"question": question, "chat_history": chat_history},
-                    config={"callbacks": group_manager},
-                )
-                url_set = set()
-                for doc in docs:
-                    if doc.metadata["source"] in url_set:
-                        continue
-                    q.put(doc.metadata["title"] + ":" + doc.metadata["source"] + "\n")
-                    url_set.add(doc.metadata["source"])
-                if len(docs) > 0:
-                    q.put("SOURCES:----------------------------")
-                chain.invoke(
-                    {
-                        "question": question,
-                        "chat_history": converted_chat_history,
-                        "context": docs,
-                    },
-                    config={"callbacks": group_manager},
-                )
+            docs = retriever_chain.invoke(
+                {"question": question, "chat_history": chat_history},
+            )
+            url_set = set()
+            for doc in docs:
+                if doc.metadata["source"] in url_set:
+                    continue
+                q.put(doc.metadata["title"] + ":" + doc.metadata["source"] + "\n")
+                url_set.add(doc.metadata["source"])
+            if len(docs) > 0:
+                q.put("SOURCES:----------------------------")
+            chain.invoke(
+                {
+                    "question": question,
+                    "chat_history": converted_chat_history,
+                    "context": docs,
+                },
+            )
             q.put(job_done)
 
         t = Thread(target=task)
@@ -246,7 +243,7 @@ async def send_feedback(request: Request):
         }
     data = await request.json()
     score = data.get("score")
-    client.create_feedback(run_id, "user_score", score=score)
+    # client.create_feedback(run_id, "user_score", score=score)
     feedback_recorded = True
     return {"result": "posted feedback successfully", "code": 200}
 
@@ -258,7 +255,7 @@ trace_url = None
 async def get_trace(request: Request):
     global run_id, trace_url
     if trace_url is None and run_id is not None:
-        trace_url = client.share_run(run_id)
+        trace_url = "" #client.share_run(run_id)
     if run_id is None:
         return {"result": "No chat session found", "code": 400}
     return trace_url if trace_url else {"result": "Trace URL not found", "code": 400}
@@ -267,4 +264,4 @@ async def get_trace(request: Request):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8081)
