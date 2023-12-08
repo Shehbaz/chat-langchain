@@ -3,9 +3,11 @@ import logging
 import os
 import re
 import pdb
+import PyPDF2
 from bs4 import BeautifulSoup, SoupStrainer, Tag
 import weaviate
 from langchain.document_loaders.recursive_url_loader import RecursiveUrlLoader
+from langchain.schema import Document
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.indexes import SQLRecordManager, index
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -53,12 +55,12 @@ def _get_text(tag):
             yield child.text
 
 
-def _doc_extractor(html):
-    soup = BeautifulSoup(html, "lxml", parse_only=SoupStrainer("article"))
-    for tag in soup.find_all(["nav", "footer", "aside"]):
-        tag.decompose()
-    joined = "".join(_get_text(soup))
-    return re.sub(r"\n\n+", "\n\n", joined)
+# def _doc_extractor(html):
+#     soup = BeautifulSoup(html, "lxml", parse_only=SoupStrainer("article"))
+#     for tag in soup.find_all(["nav", "footer", "aside"]):
+#         tag.decompose()
+#     joined = "".join(_get_text(soup))
+#     return re.sub(r"\n\n+", "\n\n", joined)
 
 
 def _simple_extractor(html):
@@ -66,10 +68,24 @@ def _simple_extractor(html):
     return re.sub(r"\n\n+", "\n\n", soup.text)
 
 
+def _pdf_extractor(pdf_path):
+    text = ""
+    with open(pdf_path, "rb") as file:
+        reader = PyPDF2.PdfReader(file)
+        for page in reader.pages:
+            text += page.extract_text()
+    return text.strip()
+
+
 def ingest_docs():
 
-    simple_urls = ["https://www.institute.global/global-health-security-consortium"]
-    doc_urls = []
+    simple_urls = ["https://www.institute.global/global-health-security-consortium",
+                   "https://inlandsocaluw.org/"]
+
+    pdf_paths = ["/home/adil/Downloads/ISAS_Working_Paper_165_-_US_Role_in_the_1971_Indo-Pak_War_25022013165818.pdf", 
+                 "/home/adil/Downloads/BOOK-4802.pdf"]  # Add path of your documents here
+
+    # doc_urls = []
     #     "https://python.langchain.com/docs/get_started",
     #     "https://python.langchain.com/docs/use_cases",
     #     "https://python.langchain.com/docs/integrations",
@@ -79,26 +95,43 @@ def ingest_docs():
     #     "https://python.langchain.com/docs/community",
     #     "https://python.langchain.com/docs/expression_language",
     # ]
-    urls = [(url, _simple_extractor) for url in simple_urls] + [
-        (url, _doc_extractor) for url in doc_urls
-    ]
+    # urls = [(url, _simple_extractor) for url in simple_urls] + [
+    #     (pdf_path, _pdf_extractor) for pdf_path in pdf_paths
+    # ]
+
     # Drop trailing "/" to avoid duplicate documents.
     link_regex = (
         f"href=[\"']{PREFIXES_TO_IGNORE_REGEX}((?:{SUFFIXES_TO_IGNORE_REGEX}.)*?)"
         f"(?:[\#'\"]|\/[\#'\"])"
     )
-    documents = []
-    for url, extractor in urls:
-        documents += RecursiveUrlLoader(
+    # Process URLs
+    url_documents = []
+    for url in simple_urls:
+        url_documents += RecursiveUrlLoader(
             url=url,
             max_depth=8,
-            extractor=extractor,
+            extractor=_simple_extractor,
             prevent_outside=True,
-            use_async=True,
             timeout=600,
             link_regex=link_regex,
             check_response_status=True,
         ).load()
+
+    # Process PDFs
+    pdf_documents = []
+    for pdf_path in pdf_paths:
+        pdf_text = _pdf_extractor(pdf_path)
+        doc = Document(
+            page_content=pdf_text,
+            metadata={
+                'source': pdf_path,
+                'title': os.path.basename(pdf_path)
+            }
+        )
+        pdf_documents.append(doc)
+
+    # Combine URL and PDF documents
+    documents = url_documents + pdf_documents
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=200)
     docs_transformed = text_splitter.split_documents(documents)
@@ -115,7 +148,7 @@ def ingest_docs():
         url=WEAVIATE_URL,
         auth_client_secret=weaviate.AuthApiKey(api_key=WEAVIATE_API_KEY),
     )
-    
+
     embedding = OpenAIEmbeddings(chunk_size=200)  # rate limit
     vectorstore = Weaviate(
         client,
@@ -136,7 +169,6 @@ def ingest_docs():
         cleanup="full",
         source_id_key="source",
     )
-
 
     logger.info(
         "LangChain now has this many vectors: ",
