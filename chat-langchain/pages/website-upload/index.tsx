@@ -77,7 +77,7 @@ export default function WebsiteForm() {
         boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
       }}>
         <div style={{ marginBottom: '20px', fontSize: '24px', fontWeight: 'bold' }}>
-          Add the link of the website you want to add your dataset
+          Add the link of the website that you want to add your dataset
         </div>
         <form onSubmit={handleSubmit} style={{
           display: 'flex',
@@ -129,7 +129,6 @@ export default function WebsiteForm() {
             fontWeight: 'bold',
             padding: '10px',
             borderRadius: '4px',
-            backgroundColor: '#1e2029',
           }}>
             {message}
           </div>
