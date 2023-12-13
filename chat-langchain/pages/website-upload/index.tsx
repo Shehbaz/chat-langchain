@@ -29,7 +29,7 @@ export default function WebsiteForm() {
     if (!isValidUrl(url)) {
       setMessage('Please enter a valid website URL.');
       setIsError(true);
-      setTimeout(clearMessage, 5000); // Clear the message after 5 seconds
+      setTimeout(clearMessage, 5000);
       return;
     }
 
@@ -46,7 +46,7 @@ export default function WebsiteForm() {
       if (response.ok) {
         const data = await response.json();
         setMessage('Website data uploaded successfully.');
-        setTimeout(clearMessage, 5000); // Clear the message after 5 seconds
+        setTimeout(clearMessage, 5000);
       } else {
         throw new Error('Failed to upload website data.');
       }
@@ -55,7 +55,7 @@ export default function WebsiteForm() {
       setIsError(true);
     } finally {
       setIsSubmitting(false);
-      setTimeout(clearMessage, 5000); // Clear the message after 5 seconds regardless of the outcome
+      setTimeout(clearMessage, 5000);
     }
   };
 
@@ -69,13 +69,16 @@ export default function WebsiteForm() {
       color: 'white'
     }}>
       <div style={{
-        maxWidth: '500px',
+        maxWidth: '600px', // Increased width
         width: '100%',
         background: '#3c4049',
-        padding: '30px',
+        padding: '40px', // Increased padding for more space
         borderRadius: '12px',
         boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
       }}>
+        <div style={{ marginBottom: '20px', fontSize: '24px', fontWeight: 'bold' }}>
+          Add the link of the website you want to add your dataset
+        </div>
         <form onSubmit={handleSubmit} style={{
           display: 'flex',
           flexDirection: 'column',
@@ -93,7 +96,9 @@ export default function WebsiteForm() {
               border: isError ? '1px solid #ff6b6b' : '1px solid #555',
               color: 'white',
               backgroundColor: '#2d313a',
-              outline: 'none'
+              outline: 'none',
+              width: '100%', // Input field takes full width
+              fontSize: '16px', // Increased font size for better readability
             }}
           />
           {isSubmitting ? (

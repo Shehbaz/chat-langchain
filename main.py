@@ -28,6 +28,7 @@ from langchain.callbacks.manager import (
 
 from constants import WEAVIATE_DOCS_INDEX_NAME
 from upload import ingest_docs  # Importing the function
+from upload import ingest_website
 import logging
 logger = logging.getLogger(__name__)
 
@@ -289,9 +290,15 @@ class WebsiteData(BaseModel):
 
 @app.post("/upload_website_data/")
 async def upload_website_data(website_data: WebsiteData):
-    # url = website_data.url
+    url = website_data.url
 
-    pdb.set_trace()
+    try:
+        ingest_website(url)
+        return {"message": "Website processed and ingested successfully"}
+    except Exception as e:
+        logger.error(f"An error occurred in ingest_docs: {str(e)}")  # Log the error
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -64,17 +64,20 @@ export default function Home() {
       alignItems: 'center',
       justifyContent: 'center',
       height: '100vh',
-      backgroundColor: '#282c34', // Dark background for better contrast
+      backgroundColor: '#282c34',
       color: 'white'
     }}>
       <div style={{
-        maxWidth: '500px',
+        maxWidth: '600px',
         width: '100%',
-        background: '#3c4049', // Card color changed to blend with background
+        background: '#3c4049',
         padding: '30px',
-        borderRadius: '12px', // Rounded corners for a softer look
-        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)', // Softer shadow
+        borderRadius: '12px',
+        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
       }}>
+        <div style={{ marginBottom: '20px', fontSize: '24px', fontWeight: 'bold', textAlign: 'center' }}>
+          Add the PDF document that you want to add to your dataset
+        </div>
         <form onSubmit={handleSubmit} style={{
           display: 'flex',
           flexDirection: 'column',
@@ -87,26 +90,27 @@ export default function Home() {
               marginBottom: '20px',
               padding: '15px', // Increased padding for a larger touch area
               borderRadius: '4px',
-              border: '1px solid #555', // Subtle border color
+              border: '1px solid #555',
               color: 'white',
-              backgroundColor: '#2d313a', // Matching the card color
-              outline: 'none' // Removing the default focus outline
+              backgroundColor: '#2d313a',
+              outline: 'none',
+              fontSize: '16px', // Increased font size
             }}
           />
           {isSubmitting ? (
-            <Spinner boxSize={30} color="#61dafb" /> // Using a brighter color for the spinner
+            <Spinner boxSize={30} color="#61dafb" />
           ) : (
             <button
               type="submit"
               style={{
-                padding: '15px 30px', // Larger button for a more tactile feel
+                padding: '15px 30px',
                 borderRadius: '4px',
                 border: 'none',
                 cursor: 'pointer',
-                backgroundColor: '#61dafb', // A bright color for the button to stand out
+                backgroundColor: '#61dafb',
                 color: 'white',
                 fontWeight: 'bold',
-                marginTop: '10px', // Added space above the button
+                marginTop: '10px',
               }}
             >
               Upload File
@@ -115,13 +119,12 @@ export default function Home() {
         </form>
         {message && (
           <div style={{
-            color: isError ? '#ff6b6b' : '#51cf66', // Red for error, green for success
+            color: isError ? '#ff6b6b' : '#51cf66',
             marginTop: '10px',
             textAlign: 'center',
             fontWeight: 'bold',
-            padding: '10px', // Padding to make the message stand out
-            borderRadius: '4px', // Rounded corners for the message box
-            backgroundColor: isError ? '#1e2029' : '#1e2029', // Subtle background for error/success message
+            padding: '10px',
+            borderRadius: '4px',
           }}>
             {message}
           </div>

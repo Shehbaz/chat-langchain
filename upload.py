@@ -4,7 +4,7 @@ import os
 import re
 import pdb
 import PyPDF2
-from bs4 import BeautifulSoup, SoupStrainer, Tag
+from bs4 import BeautifulSoup
 import weaviate
 from langchain.document_loaders.recursive_url_loader import RecursiveUrlLoader
 from langchain.schema import Document
@@ -28,14 +28,6 @@ WEAVIATE_API_KEY = os.environ["WEAVIATE_API_KEY"]
 RECORD_MANAGER_DB_URL = os.environ["RECORD_MANAGER_DB_URL"]
 
 
-def _pdf_extractor(file_stream):
-    text = ""
-    reader = PyPDF2.PdfReader(file_stream)
-    for page in reader.pages:
-        text += page.extract_text() or ''
-    return text.strip()
-
-
 def ingest_docs(file_stream, filename):
     # Process the uploaded PDF file
     pdf_text = _pdf_extractor(file_stream)
@@ -49,24 +41,47 @@ def ingest_docs(file_stream, filename):
 
     # Combine URL and PDF documents
     documents = [pdf_document]
+    process_and_index_documents(documents)
 
+
+def ingest_website(url):
+    # Drop trailing "/" to avoid duplicate documents.
+    link_regex = (
+        f"href=[\"']{PREFIXES_TO_IGNORE_REGEX}((?:{SUFFIXES_TO_IGNORE_REGEX}.)*?)"
+        f"(?:[\#'\"]|\/[\#'\"])"
+    )
+    url_documents = RecursiveUrlLoader(
+        url=url,
+        max_depth=8,
+        extractor=_simple_extractor,
+        prevent_outside=True,
+        timeout=600,
+        link_regex=link_regex,
+        check_response_status=True,
+    ).load()
+
+    pdb.set_trace()
+    documents = url_documents
+    process_and_index_documents(documents)
+
+
+def process_and_index_documents(documents):
+    """
+    Process and index documents into Weaviate.
+    """
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=200)
     docs_transformed = text_splitter.split_documents(documents)
-    # We try to return 'source' and 'title' metadata when querying vector store and
-    # Weaviate will error at query time if one of the attributes is missing from a
-    # retrieved document.
+
     for doc in docs_transformed:
-        if "source" not in doc.metadata:
-            doc.metadata["source"] = ""
-        if "title" not in doc.metadata:
-            doc.metadata["title"] = ""
-    
+        doc.metadata.setdefault("source", "")
+        doc.metadata.setdefault("title", "")
+
     client = weaviate.Client(
         url=WEAVIATE_URL,
         auth_client_secret=weaviate.AuthApiKey(api_key=WEAVIATE_API_KEY),
     )
 
-    embedding = OpenAIEmbeddings(chunk_size=200)  # rate limit
+    embedding = OpenAIEmbeddings(chunk_size=200)
     vectorstore = Weaviate(
         client,
         WEAVIATE_DOCS_INDEX_NAME,
@@ -78,7 +93,6 @@ def ingest_docs(file_stream, filename):
     record_manager = SQLRecordManager(
         f"weaviate/{WEAVIATE_DOCS_INDEX_NAME}", db_url=RECORD_MANAGER_DB_URL
     )
-
     record_manager.create_schema()
 
     index(
@@ -93,3 +107,16 @@ def ingest_docs(file_stream, filename):
         "LangChain now has this many vectors: ",
         client.query.aggregate(WEAVIATE_DOCS_INDEX_NAME).with_meta_count().do(),
     )
+
+
+def _simple_extractor(html):
+    soup = BeautifulSoup(html, "lxml")
+    return re.sub(r"\n\n+", "\n\n", soup.text)
+
+
+def _pdf_extractor(file_stream):
+    text = ""
+    reader = PyPDF2.PdfReader(file_stream)
+    for page in reader.pages:
+        text += page.extract_text() or ''
+    return text.strip()
