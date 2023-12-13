@@ -12,6 +12,7 @@ from langchain.schema.messages import HumanMessage, AIMessage
 from langchain.vectorstores import Weaviate
 # from langsmith import Client
 from dotenv import load_dotenv
+from pydantic import BaseModel
 from fastapi import UploadFile, File, HTTPException
 from threading import Thread
 from queue import Queue, Empty
@@ -27,6 +28,9 @@ from langchain.callbacks.manager import (
 
 from constants import WEAVIATE_DOCS_INDEX_NAME
 from upload import ingest_docs  # Importing the function
+import logging
+logger = logging.getLogger(__name__)
+
 
 load_dotenv()
 
@@ -272,13 +276,23 @@ async def upload_pdf(file: UploadFile = File(...)):
         raise HTTPException(status_code=415, detail="Unsupported file type")
 
     try:
-        # Call the modified ingest_docs function
-        await ingest_docs(file.file, file.filename)
+        ingest_docs(file.file, file.filename)
         return {"message": "PDF processed and ingested successfully"}
-
     except Exception as e:
+        logger.error(f"An error occurred in ingest_docs: {str(e)}")  # Log the error
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
- 
+
+
+class WebsiteData(BaseModel):
+    url: str
+
+
+@app.post("/upload_website_data/")
+async def upload_website_data(website_data: WebsiteData):
+    # url = website_data.url
+
+    pdb.set_trace()
+
 if __name__ == "__main__":
     import uvicorn
 

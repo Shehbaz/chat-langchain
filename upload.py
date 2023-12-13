@@ -61,7 +61,6 @@ def ingest_docs(file_stream, filename):
         if "title" not in doc.metadata:
             doc.metadata["title"] = ""
     
-
     client = weaviate.Client(
         url=WEAVIATE_URL,
         auth_client_secret=weaviate.AuthApiKey(api_key=WEAVIATE_API_KEY),
@@ -81,7 +80,7 @@ def ingest_docs(file_stream, filename):
     )
 
     record_manager.create_schema()
-    pdb.set_trace()
+
     index(
         docs_transformed,
         record_manager,
