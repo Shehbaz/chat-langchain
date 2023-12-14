@@ -60,7 +60,6 @@ def ingest_website(url):
         check_response_status=True,
     ).load()
 
-    pdb.set_trace()
     documents = url_documents
     process_and_index_documents(documents)
 

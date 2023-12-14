@@ -1,105 +1,110 @@
-import { useState } from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { Spinner } from "@chakra-ui/react";
 
-export default function Home() {
-  const [file, setFile] = useState(null);
+const isValidUrl = (urlString) => {
+  try {
+    new URL(urlString);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+export default function WebsiteForm() {
+  const [url, setUrl] = useState('');
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    if (selectedFile && selectedFile.type === 'application/pdf') {
-      setFile(selectedFile);
-      setMessage('');
-      setIsError(false);
-    } else {
-      setMessage('Please select a PDF file.');
-      setIsError(true);
-    }
+  const clearMessage = () => {
+    setMessage('');
+    setIsError(false);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!file) {
-      setMessage('Please select a file first.');
+    setIsError(false);
+    setMessage('');
+    
+    if (!isValidUrl(url)) {
+      setMessage('Please enter a valid website URL.');
       setIsError(true);
+      setTimeout(clearMessage, 5000);
       return;
     }
 
     setIsSubmitting(true);
-
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/upload_pdf/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/upload_website_data/`, {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessage('Website data uploaded successfully.');
+      } else {
+        throw new Error('Failed to upload website data.');
       }
-
-      const data = await response.json();
-      setMessage(data.message);
-      setIsError(false);
     } catch (error) {
-      setMessage(error.toString());
+      setMessage(error.message || 'An error occurred.');
       setIsError(true);
     } finally {
       setIsSubmitting(false);
+      setTimeout(clearMessage, 5000);
     }
-
-    setTimeout(() => {
-      setMessage('');
-      setIsError(false);
-    }, 9000);
   };
 
   return (
     <div style={{
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       height: '100vh',
       backgroundColor: '#282c34',
       color: 'white'
-    }}>
+      }}>
       <div style={{
         maxWidth: '600px',
         width: '100%',
         background: '#3c4049',
-        padding: '30px',
+        padding: '40px',
         borderRadius: '12px',
         boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+        textAlign: 'center',
       }}>
-        <div style={{ marginBottom: '20px', fontSize: '24px', fontWeight: 'bold', textAlign: 'center' }}>
-          Add the PDF document that you want to add to your dataset
-        </div>
+        <h1 style={{ marginBottom: '20px', fontSize: '24px', fontWeight: 'bold' }}>
+          Add the link of the website that you want to add to your dataset
+        </h1>
         <form onSubmit={handleSubmit} style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
         }}>
           <input
-            type="file"
-            onChange={handleFileChange}
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="Enter website URL"
             style={{
               marginBottom: '20px',
-              padding: '15px', // Increased padding for a larger touch area
+              padding: '20px',
               borderRadius: '4px',
-              border: '1px solid #555',
+              border: isError ? '1px solid #ff6b6b' : '1px solid #555',
               color: 'white',
               backgroundColor: '#2d313a',
               outline: 'none',
-              fontSize: '16px', // Increased font size
+              width: '100%',
+              fontSize: '16px',
             }}
           />
-          {isSubmitting ? (
-            <Spinner boxSize={30} color="#61dafb" />
-          ) : (
+          {!isSubmitting && (
             <button
               type="submit"
               style={{
@@ -113,8 +118,17 @@ export default function Home() {
                 marginTop: '10px',
               }}
             >
-              Upload File
+              Submit URL
             </button>
+          )}
+          {isSubmitting && (
+            <>
+              <Spinner boxSize={30} color="#61dafb" />
+              <p style={{ marginTop: '10px', color: '#ff6b6b' }}>
+                This can take time depending upon the size of data, please be patient!!
+                Contact admin if any error occurs.
+              </p>
+            </>
           )}
         </form>
         {message && (
