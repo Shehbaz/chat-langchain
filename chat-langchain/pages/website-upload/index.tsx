@@ -46,7 +46,6 @@ export default function WebsiteForm() {
       if (response.ok) {
         const data = await response.json();
         setMessage('Website data uploaded successfully.');
-        setTimeout(clearMessage, 5000);
       } else {
         throw new Error('Failed to upload website data.');
       }
@@ -62,23 +61,25 @@ export default function WebsiteForm() {
   return (
     <div style={{
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       height: '100vh',
       backgroundColor: '#282c34',
       color: 'white'
-    }}>
+      }}>
       <div style={{
-        maxWidth: '600px', // Increased width
+        maxWidth: '600px',
         width: '100%',
         background: '#3c4049',
-        padding: '40px', // Increased padding for more space
+        padding: '40px',
         borderRadius: '12px',
         boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+        textAlign: 'center',
       }}>
-        <div style={{ marginBottom: '20px', fontSize: '24px', fontWeight: 'bold' }}>
-          Add the link of the website that you want to add your dataset
-        </div>
+        <h1 style={{ marginBottom: '20px', fontSize: '24px', fontWeight: 'bold' }}>
+          Add the link of the website that you want to add to your dataset
+        </h1>
         <form onSubmit={handleSubmit} style={{
           display: 'flex',
           flexDirection: 'column',
@@ -91,19 +92,17 @@ export default function WebsiteForm() {
             placeholder="Enter website URL"
             style={{
               marginBottom: '20px',
-              padding: '15px',
+              padding: '20px',
               borderRadius: '4px',
               border: isError ? '1px solid #ff6b6b' : '1px solid #555',
               color: 'white',
               backgroundColor: '#2d313a',
               outline: 'none',
-              width: '100%', // Input field takes full width
-              fontSize: '16px', // Increased font size for better readability
+              width: '100%',
+              fontSize: '16px',
             }}
           />
-          {isSubmitting ? (
-            <Spinner boxSize={30} color="#61dafb" />
-          ) : (
+          {!isSubmitting && (
             <button
               type="submit"
               style={{
@@ -119,6 +118,15 @@ export default function WebsiteForm() {
             >
               Submit URL
             </button>
+          )}
+          {isSubmitting && (
+            <>
+              <Spinner boxSize={30} color="#61dafb" />
+              <p style={{ marginTop: '10px', color: '#ff6b6b' }}>
+                This can take time depending upon the size of data, please be patient!!
+                Contact admin if any error occurs.
+              </p>
+            </>
           )}
         </form>
         {message && (
