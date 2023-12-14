@@ -11,10 +11,9 @@ export function EmptyState(props: {
   return (
     <div className="p-8 rounded flex flex-col items-center">
       <Heading fontSize="3xl" fontWeight={"medium"} mb={1} color={"white"}>Chat Devbox</Heading>
-      <Heading fontSize="xl" fontWeight={"normal"} mb={1} color={"white"} marginTop={"10px"} textAlign={"center"}>Ask me anything about Devbox&apos;s{" "}
-      <Link href='https://devboxtech.co.uk' color={"blue.200"}>
-        documentation!
-      </Link></Heading>
+      <Heading fontSize="xl" fontWeight={"normal"} mb={1} color={"white"} marginTop={"10px"} textAlign={"center"}>
+        How can I help you today?
+      </Heading>
     </div>
   );
 }

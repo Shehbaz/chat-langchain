@@ -72,7 +72,7 @@ export default function Home() {
       alignItems: 'center',
       justifyContent: 'center',
       height: '100vh',
-      backgroundColor: '#282c34',
+      backgroundColor: 'rgb(38, 38, 41)',
       color: 'white'
     }}>
       <div style={{
