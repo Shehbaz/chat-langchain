@@ -33,7 +33,7 @@ export default function Home() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8081/upload_pdf/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/upload_pdf/`, {
         method: 'POST',
         body: formData,
       });

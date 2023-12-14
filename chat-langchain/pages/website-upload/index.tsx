@@ -35,7 +35,7 @@ export default function WebsiteForm() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:8081/upload_website_data/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/upload_website_data/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
