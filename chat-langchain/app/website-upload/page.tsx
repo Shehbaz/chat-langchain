@@ -47,7 +47,11 @@ export default function WebsiteForm() {
 
       if (response.ok) {
         const data = await response.json();
-        setMessage('Website data uploaded successfully.');
+        setMessage('Website data ingested successfully.');
+
+        // Clear the URL input field after successful upload
+        setUrl('');
+  
       } else {
         throw new Error('Failed to upload website data.');
       }
