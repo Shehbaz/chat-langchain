@@ -27,37 +27,44 @@ export default function Home() {
       setIsError(true);
       return;
     }
-
+  
     setIsSubmitting(true);
-
+  
     const formData = new FormData();
     formData.append('file', file);
-
+  
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/upload_pdf/`, {
         method: 'POST',
         body: formData,
       });
-
+  
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
-
+  
       const data = await response.json();
       setMessage(data.message);
       setIsError(false);
+  
+      // Clear the file input after successful upload
+      setFile(null);
+      // Additionally, reset the file input element in the DOM
+      event.target.reset();
+  
     } catch (error) {
       setMessage(error.toString());
       setIsError(true);
     } finally {
       setIsSubmitting(false);
     }
-
+  
     setTimeout(() => {
       setMessage('');
       setIsError(false);
     }, 9000);
   };
+  
 
   return (
     <div style={{
