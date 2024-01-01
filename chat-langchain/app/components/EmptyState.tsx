@@ -1,11 +1,6 @@
-import { MouseEvent } from 'react';
 import { Heading } from '@chakra-ui/react';
 
-export function EmptyState({ onChoice }) {
-  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-    onChoice(e.target.innerText);
-  };
-
+export function EmptyState() {
   return (
     <div className="p-8 rounded flex flex-col items-center">
       <Heading
@@ -15,8 +10,7 @@ export function EmptyState({ onChoice }) {
         color="teal.300"
         mb={4}
         letterSpacing="wider"
-        _hover={{ color: "teal.400", cursor: "pointer" }}
-        onClick={handleClick}
+        _hover={{ color: "teal.400" }} // Removed cursor style to indicate it's not clickable
       >
         Chat Devbox
       </Heading>
