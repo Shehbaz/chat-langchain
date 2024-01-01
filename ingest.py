@@ -85,8 +85,7 @@ def ingest_docs():
     simple_urls = ["https://www.institute.global/global-health-security-consortium",
                    "https://inlandsocaluw.org/"]
 
-    pdf_paths = ["/home/adil/Downloads/ISAS_Working_Paper_165_-_US_Role_in_the_1971_Indo-Pak_War_25022013165818.pdf", 
-                 "/home/adil/Downloads/BOOK-4802.pdf"]  # Add path of your documents here
+    pdf_paths = []  # Add path of your documents here
 
     # doc_urls = []
     #     "https://python.langchain.com/docs/get_started",
