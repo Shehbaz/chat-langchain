@@ -211,7 +211,7 @@ export function ChatWindow(props: {
   };
 
   return (
-    <div className="flex flex-col items-center p-8 rounded grow max-h-full">
+    <div className="flex flex-col items-center rounded grow max-h-full" style={{"background" : "rgb(38, 38, 41)", "padding": "10px 50px"}}>
       {messages.length > 0 && (
         <Flex direction={"column"} alignItems={"center"} paddingBottom={"20px"}>
           <Heading fontSize="2xl" fontWeight={"medium"} mb={1} color={"white"}>{titleText}</Heading>
@@ -222,6 +222,7 @@ export function ChatWindow(props: {
       )}
       <div
         className="flex flex-col-reverse w-full mb-2 overflow-auto"
+        style={{"height": "50vh"}}
         ref={messageContainerRef}
       >
         {messages.length > 0
